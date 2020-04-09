@@ -1,5 +1,3 @@
-import java.util.Random;  // import Random class
-import java.awt.Color; // import Color class
 import java.awt.Point; // import Point class
 import java.util.List;
 import java.util.ArrayList;
@@ -7,22 +5,20 @@ import java.util.ArrayList;
 
 // A class for representing tetrominoes with 7 different shapes ('I', 'S', 'Z', 'O', 'T', 'L' and 'J')
 public class Tetrominos {
-    // Private data fields
-	private Color color;                                                // color of the tetromino
-	private int gridWidth, gridHeight;                                  // dimensions of the tetris game grid   
-	private Tile[][] tileMatrix;
-	private Point bottomLeftCorner;
+	// Private data fields
+	private int gridWidth, gridHeight;    //dimensions of the tetris game grid   
+	private Tile[][] tileMatrix;          //keep each shape of tetromino in tileMatrix
+	private Point bottomLeftCorner;       //reference point of the matrix
+	private char Name;                    //tetromino's name
+	public Boolean GameOver = false;      //check the Game Over
 
 	// Constructor
 	Tetrominos (char randomName, int gridHeight, int gridWidth) {
 		this.gridHeight = gridHeight;
 		this.gridWidth = gridWidth;
-		// color of the tetrominos is determined randomly
-		Random random = new Random();
-		int red = random.nextInt(256), green = random.nextInt(256), blue = random.nextInt(256);
-		color = new Color(red, green, blue);
+		this.Name = randomName;
+
 		// set the shape of the tetromino based on the given name
-		
 		if (randomName == 'I') {
 			// shape of the tetromino I in its initial orientation
 			tileMatrix = new Tile[4][4];
@@ -31,7 +27,7 @@ public class Tetrominos {
 			tileMatrix[1][2] = new Tile(new Point(5, gridHeight + 1));
 			tileMatrix[1][3] = new Tile(new Point(5, gridHeight));
 		}
-		else if (randomName == 'S') {
+		else if (randomName == 'Z') {
 			// shape of the tetromino Z in its initial orientation
 			tileMatrix = new Tile[3][3];
 			tileMatrix[1][0] = new Tile(new Point(6, gridHeight + 2));
@@ -39,7 +35,7 @@ public class Tetrominos {
 			tileMatrix[0][1] = new Tile(new Point(5, gridHeight + 1));
 			tileMatrix[1][1] = new Tile(new Point(6, gridHeight + 1));
 		}
-		else if (randomName == 'Z') {
+		else if (randomName == 'S') {
 			// shape of the tetromino S in its initial orientation
 			tileMatrix = new Tile[3][3];
 			tileMatrix[0][0] = new Tile(new Point(5, gridHeight + 2));
@@ -78,10 +74,14 @@ public class Tetrominos {
 			tileMatrix[0][2] = new Tile(new Point(5, gridHeight));
 			tileMatrix[1][2] = new Tile(new Point(6, gridHeight));	
 		}
-
+		//control of the entry of each tetromino into the grid
 		bottomLeftCorner = new Point(5, gridHeight);
 	}	
-    
+	//Method for random state of tetromino's name
+	public char Name() {
+		return Name;
+	}
+
 	// Method for rotating tetromino clockwise by 90 degrees
 	public boolean Rotate(GridA gameGrid) {
 
@@ -101,10 +101,10 @@ public class Tetrominos {
 					position.x = bottomLeftCorner.x + col;
 					position.y = bottomLeftCorner.y + (n-1) - row;
 				}
-				
+
 				if(position.x < 0 || position.x >= gridWidth)
 					return false;
-				
+
 				if (gameGrid.isOccupied(position))
 					return false;
 			}
@@ -118,21 +118,16 @@ public class Tetrominos {
 					continue;
 
 				Point position = tileMatrix[row][col].getPosition();
-				
+
 				rotatedMatrix[col][n-1-row] = tileMatrix[row][col];
 				position.x=bottomLeftCorner.x + (n-1-row);
 				position.y=bottomLeftCorner.y + (n-1) - col;
 				tileMatrix[row][col].setPosition(position);
 			}
 		}
-		    
+
 		tileMatrix = rotatedMatrix;		
 		return true;
-	}
-
-	// Getter method for getting the color of tetromino
-	public Color getColor() {
-		return color;
 	}
 
 	// Method for displaying tetromino on the game grid	
@@ -148,11 +143,9 @@ public class Tetrominos {
 		for (Tile tile : getTileList())
 		{			
 			Point nextPosition = new Point(tile.getPosition().x + move.x, tile.getPosition().y + move.y);
-			if(nextPosition.x < 0 || 
-					nextPosition.x >= gridWidth ||
-					nextPosition.y < 0)
+			if (nextPosition.x < 0 || nextPosition.x >= gridWidth || nextPosition.y < 0)
 				return false;
-			
+
 			if (gameGrid.isOccupied(nextPosition))
 				return false;
 		}
@@ -162,28 +155,34 @@ public class Tetrominos {
 	// Method for moving tetromino down by 1 in the game grid
 	public boolean goDown(GridA gameGrid) {
 		// Check whether tetromino can go down or not
-		if (!canMove(gameGrid, new Point(0, -1))) 
+		if (!canMove(gameGrid, new Point(0, -1)))
+		{
+			if (bottomLeftCorner.y + tileMatrix.length >= gridHeight) {						
+				GameOver = true;
+			}			
 			return false;
+		};
 
 		for (Tile tile : getTileList())
 		{
 			tile.move(0, -1);
 		}
 		bottomLeftCorner.translate(0, -1);
-		
+
 		return true;
 	}
+
 	// Method for moving tetromino left by 1 in the game grid
 	public boolean goLeft(GridA gameGrid) {
 		if (!canMove(gameGrid, new Point(-1, 0)))
 			return false;
-		
+
 		for (Tile tile : getTileList())
 		{
 			tile.move(-1, 0);
 		}
 		bottomLeftCorner.translate(-1, 0);
-	
+
 		return true;
 	}
 
@@ -191,13 +190,13 @@ public class Tetrominos {
 	public boolean goRight(GridA gameGrid) {
 		if (!canMove(gameGrid, new Point(1, 0))) 
 			return false;
-		
+
 		for (Tile tile : getTileList())
 		{
 			tile.move(1, 0);
 		}
 		bottomLeftCorner.translate(1, 0);
-		
+
 		return true;
 	}	
 
@@ -213,4 +212,5 @@ public class Tetrominos {
 		}
 		return aList;	
 	}
+
 }
