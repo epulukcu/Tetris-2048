@@ -7,8 +7,6 @@ import java.awt.Point;
 //The Tetris2048 class for representing game
 public class Tetris2048 {
 
-
-	
 	//static public Tetrominoes nextTetromino;
 	
 	//The method for creating the incoming tetromino to enter the game grid
@@ -119,8 +117,6 @@ public class Tetris2048 {
 				StdDraw.text(14, 16, gameGrid.getScoreAsString());
 				StdDraw.show();  // copy offscreen buffer to onscreen (double buffering)
 				StdDraw.pause(150);  // pause for 150 ms (double buffering)
-				
 			} 
 		}
-	
 }
